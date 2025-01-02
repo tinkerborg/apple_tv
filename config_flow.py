@@ -98,7 +98,6 @@ class AppleTVConfigFlow(ConfigFlow, domain=DOMAIN):
     VERSION = 1
 
     scan_filter: str | None = None
-    all_identifiers: set[str]
     atv: BaseConfig | None = None
     atv_identifiers: list[str] | None = None
     _host: str  # host in zeroconf discovery info, should not be accessed by other flows
