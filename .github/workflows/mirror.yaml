@@ -6,12 +6,14 @@ env:
   source_dir: homeassistant/components/apple_tv
   destination_repo: ${{ github.server_url }}/${{ github.repository }}.git
   destination_branch: master
-  git_util: .github/lib/git_util.sh
   git_email: 15373049+tinkerborg@users.noreply.github.com
   git_username: tinkerborg
+  git_util: .github/lib/git_util.sh
 
 on:
   push:
+  schedule:
+    - cron: 0 1 * * *
 
 permissions:
   contents: write
