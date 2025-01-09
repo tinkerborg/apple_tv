@@ -1,8 +1,8 @@
-# homeassistant apple_tv patch
+# Home Assistant apple_tv patch
 
 Custom component to override apple_tv pyatv dependency.
 
-If you are using an AppleTV with audio via Homepods and homeassistant does not detect
+If you are using an AppleTV with audio via Homepods and home-assistant does not detect
 power status properly, this should resolve it.
 
 This repo should update automatically with any upstream changes to the apple_tv component.
@@ -14,6 +14,8 @@ is updated to use the new version.
 
     cd config/custom_components
     git clone https://github.com/tinkerborg/apple_tv.git
+
+Restart home-assisant and AppleTV should now be working correctly.
 
 ## Troubleshooting
 
