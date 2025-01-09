@@ -1,5 +1,6 @@
 {
   "domain": "apple_tv",
+  "version": "0.1.0",
   "name": "Apple TV",
   "codeowners": ["@postlund"],
   "config_flow": true,
@@ -7,7 +8,9 @@
   "documentation": "https://www.home-assistant.io/integrations/apple_tv",
   "iot_class": "local_push",
   "loggers": ["pyatv", "srptools"],
-  "requirements": ["pyatv==0.15.0"],
+  "requirements": [
+    "git+https://github.com/tinkerborg/pyatv.git@companion-powerstate#pyatv==9999"
+  ],
   "zeroconf": [
     "_mediaremotetv._tcp.local.",
     "_companion-link._tcp.local.",

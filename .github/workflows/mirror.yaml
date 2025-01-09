@@ -1,0 +1,75 @@
+---
+name: Update mirror
+env:
+  source_repo: https://github.com/home-assistant/core.git
+  source_branch: rc
+  source_dir: homeassistant/components/apple_tv
+  destination_repo: ${{ github.server_url }}/${{ github.repository }}.git
+  destination_branch: master
+  git_util: .github/lib/git_util.sh
+  git_email: 15373049+tinkerborg@users.noreply.github.com
+  git_username: tinkerborg
+
+on:
+  push:
+
+permissions:
+  contents: write
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    steps:
+      - name: repo checkout
+        uses: actions/checkout@v4
+
+      - name: repo setup
+        run: |
+          . $git_util
+
+          fetch_notes
+          git fetch origin "$destination_branch" --unshallow
+          git remote add upstream "$source_repo"
+          git fetch --filter=blob:none upstream "$source_branch"
+
+          cat << EOF >> "$GITHUB_ENV"
+          previous_upstream_commit=$(latest_note upstream_commit origin/"$destination_branch")
+          upstream_commit=$(git rev-parse upstream/"$source_branch")
+          EOF
+
+          git config --global user.name "$git_username"
+          git config --global user.email "$git_email"
+
+      - name: update mirror
+        if: env.upstream_commit != env.previous_upstream_commit
+        run: |
+          . $git_util
+
+          echo "Updating mirror from ${previous_upstream_commit:-empty} to $upstream_commit"
+          echo
+
+          git checkout "$source_branch"
+
+          previous_mirror_commit=$(latest_note mirror_commit origin/"$destination_branch")
+
+          FILTER_BRANCH_SQUELCH_WARNING=1 git filter-branch --prune-empty --subdirectory-filter "$source_dir"
+
+          mirror_commit=$(git rev-parse "$source_branch")
+
+          echo "prev $previous_mirror_commit"
+
+          git show-ref "$destination_branch" --quiet \
+            && git checkout "$destination_branch" \
+            || git switch --orphan "$destination_branch"
+
+          [ -z "$previous_mirror_commit" ] && range="$source_branch" || range="$previous_mirror_commit".."$source_branch"
+          git cherry-pick -X ours --keep-redundant-commits $(git rev-list --reverse "$range" .)
+
+          git notes --ref=upstream_commit add HEAD -m "$upstream_commit"
+          git notes --ref=mirror_commit add HEAD -m "$mirror_commit"
+
+      - name: push changes
+        if: env.upstream_commit != env.previous_upstream_commit
+        run: |
+          git push origin "$destination_branch"
+          git push origin refs/notes/upstream_commit refs/notes/mirror_commit
